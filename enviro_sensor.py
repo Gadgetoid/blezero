@@ -50,6 +50,7 @@ devices = (
 
 async def main():
     while True:
+       
         for device in devices:
             await device.update()
 
@@ -65,22 +66,26 @@ async def refresh_display():
     W = int(WIDTH // 2)
     H = int(HEIGHT // 4)
 
-    GW = W - 4
-    GH = H - 4
+    GW = W - 4 - 20
+    GH = H - 4 - 20
+    graphics.set_pen(WHITE)
+    graphics.text(f"{devices[0].name}", WIDTH//2 - 32, 0, scale = 2)
+    devices[0].sensors[0].draw_graph(graphics, 0+22, 0+16, GW, GH, BLUE, WHITE)
+    devices[0].sensors[1].draw_graph(graphics, W+12, 0+16, GW, GH, RED, WHITE)
+    devices[0].sensors[2].draw_graph(graphics, 0+22, H+2, GW, GH, GREEN, WHITE)
+    devices[0].sensors[3].draw_graph(graphics, W+12, H+2, GW, GH, TEAL, WHITE)
+    graphics.line(0, HEIGHT//2, WIDTH, HEIGHT//2)
+    graphics.text(f"{devices[1].name}", WIDTH//2 - 32, HEIGHT//2 + 2, scale = 2)
+    devices[1].sensors[0].draw_graph(graphics, 0+22, (H*2)+0+16, GW, GH, BLUE, WHITE)
+    devices[1].sensors[1].draw_graph(graphics, W+12, (H*2)+0+16, GW, GH, RED, WHITE)
+    devices[1].sensors[2].draw_graph(graphics, 0+22, (H*2)+H+2, GW, GH, GREEN, WHITE)
+    devices[1].sensors[3].draw_graph(graphics, W+12, (H*2)+H+2, GW, GH, TEAL, WHITE)
+    
+    
 
-    devices[0].sensors[0].draw_graph(graphics, 0+2, 0+2, GW, GH, BLUE, WHITE)
-    devices[0].sensors[1].draw_graph(graphics, W+2, 0+2, GW, GH, RED, WHITE)
-    devices[0].sensors[2].draw_graph(graphics, 0+2, H+2, GW, GH, GREEN, WHITE)
-    devices[0].sensors[3].draw_graph(graphics, W+2, H+2, GW, GH, TEAL, WHITE)
-
-    devices[1].sensors[0].draw_graph(graphics, 0+2, (H*2)+0+2, GW, GH, BLUE, WHITE)
-    devices[1].sensors[1].draw_graph(graphics, W+2, (H*2)+0+2, GW, GH, RED, WHITE)
-    devices[1].sensors[2].draw_graph(graphics, 0+2, (H*2)+H+2, GW, GH, GREEN, WHITE)
-    devices[1].sensors[3].draw_graph(graphics, W+2, (H*2)+H+2, GW, GH, TEAL, WHITE)
     print("Display update...")
     graphics.update()
 
 
+
 asyncio.run(main())
-
-
