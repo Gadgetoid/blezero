@@ -1,10 +1,10 @@
 import uasyncio as asyncio
 from blezero import Device, Sensor, IRRADIANCE, TEMPERATURE, PRESSURE, HUMIDITY
 
-from picographics import PicoGraphics, DISPLAY_PICOVISION, PEN_DV_RGB555 as PEN
+from picographics import PicoGraphics, PEN_RGB555 as PEN
 
 
-graphics = PicoGraphics(DISPLAY_PICOVISION, width=640, height=480, pen_type=PEN)
+graphics = PicoGraphics(width=640, height=480, pen_type=PEN)
 WIDTH, HEIGHT = graphics.get_bounds()
 
 WHITE = graphics.create_pen(255, 255, 255)

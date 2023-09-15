@@ -1,10 +1,13 @@
 import uasyncio as asyncio
 from blezero import Device, Sensor, IRRADIANCE, TEMPERATURE, PRESSURE, HUMIDITY
+from picographics import PicoGraphics, PEN_RGB555 as PEN
 
-from picographics import PicoGraphics, DISPLAY_PICOVISION, PEN_DV_RGB555 as PEN
+"""
+In this example weather data from the Enviro weather(https://shop.pimoroni.com/products/enviro-weather-board-only) and indoor(https://shop.pimoroni.com/products/enviro-indoor) devices is displayed on a HDMI screen
+A bar graph of each sensor on a given device is drawn and its respective data is frequently updated 
 
-
-graphics = PicoGraphics(DISPLAY_PICOVISION, width=640, height=480, pen_type=PEN)
+"""
+graphics = PicoGraphics(width=640, height=480, pen_type=PEN)
 WIDTH, HEIGHT = graphics.get_bounds()
 
 WHITE = graphics.create_pen(255, 255, 255)
@@ -34,14 +37,14 @@ print("Cleared...")
 devices = (
     Device(
         'enviro-indoor',
-        Sensor("Light", 160, IRRADIANCE, drange=(0, 150)),
+        Sensor("Light", 160, IRRADIANCE, drange=None),
         Sensor("Temp", 160, TEMPERATURE, drange=(20, 40)),
         Sensor("Pressure", 160, PRESSURE, drange=(1000, 1100)),
         Sensor("Humidity", 160, HUMIDITY, drange=(0, 100))
     ),
     Device(
         'enviro-weather',
-        Sensor("Light", 160, IRRADIANCE, drange=(0, 150)),
+        Sensor("Light", 160, IRRADIANCE, drange=None),
         Sensor("Temp", 160, TEMPERATURE, drange=(20, 40)),
         Sensor("Pressure", 160, PRESSURE, drange=(1000, 1100)),
         Sensor("Humidity", 160, HUMIDITY, drange=(0, 100))
@@ -69,20 +72,22 @@ async def refresh_display():
     GW = W - 4 - 20
     GH = H - 4 - 20
     graphics.set_pen(WHITE)
-    graphics.text(f"{devices[0].name}", WIDTH//2 - 32, 0, scale = 2)
+    text1_width = graphics.measure_text(f"{devices[0].name}", scale=2)
+    graphics.text(f"{devices[0].name}", WIDTH//2 - text1_width//2, 0, scale = 2)
     devices[0].sensors[0].draw_graph(graphics, 0+22, 0+16, GW, GH, BLUE, WHITE)
     devices[0].sensors[1].draw_graph(graphics, W+12, 0+16, GW, GH, RED, WHITE)
     devices[0].sensors[2].draw_graph(graphics, 0+22, H+2, GW, GH, GREEN, WHITE)
     devices[0].sensors[3].draw_graph(graphics, W+12, H+2, GW, GH, TEAL, WHITE)
+    
     graphics.line(0, HEIGHT//2, WIDTH, HEIGHT//2)
-    graphics.text(f"{devices[1].name}", WIDTH//2 - 32, HEIGHT//2 + 2, scale = 2)
+    
+    text2_width = graphics.measure_text(f"{devices[1].name}", scale=2)
+    graphics.text(f"{devices[1].name}", WIDTH//2 - text2_width//2, HEIGHT//2 + 2, scale = 2)
     devices[1].sensors[0].draw_graph(graphics, 0+22, (H*2)+0+16, GW, GH, BLUE, WHITE)
     devices[1].sensors[1].draw_graph(graphics, W+12, (H*2)+0+16, GW, GH, RED, WHITE)
     devices[1].sensors[2].draw_graph(graphics, 0+22, (H*2)+H+2, GW, GH, GREEN, WHITE)
     devices[1].sensors[3].draw_graph(graphics, W+12, (H*2)+H+2, GW, GH, TEAL, WHITE)
     
-    
-
     print("Display update...")
     graphics.update()
 

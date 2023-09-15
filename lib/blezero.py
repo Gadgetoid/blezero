@@ -2,10 +2,13 @@ import struct
 import aioble
 import uasyncio as asyncio
 import bluetooth
+import math
 from micropython import const
 
 """
-Handle connections to the Enviro Indoor and Weather sensors via BLE
+Finds and connects to Pimoroni Enviro devices via BLE.
+These peripheral devices must be running on enviro-ble firmware(https://github.com/pimoroni/enviro-ble)
+Data from the sensors of the aforementioned devices is read and decoded in the Sensor class.
 
 """
 # org.bluetooth.service.environmental_sensing
@@ -69,10 +72,13 @@ class Sensor:
         value = self.decode(value)
 
         if self.autorange:
-            self.lower = min(self.dlog)
-            self.lower = min(self.lower, value)
-            self.upper = max(self.dlog)
-            self.upper = min(self.upper, value)
+            self.lower = min((x for x in self.dlog if x is not None), default=0)
+            self.lower = int(round(min(self.lower, value/2), -1))
+            self.upper = max((x for x in self.dlog if x is not None), default=1)
+            self.upper = int(round(max(self.upper, value*2), -1))
+
+            
+            
 
         self.dlog[self.dptr] = value
 
@@ -113,12 +119,14 @@ class Sensor:
         return value
 
     def draw_graph(self, graphics, x, y, w, h, bar_color, caption_color, bar_width=4, bar_margin=2):
+        """
+        Draws a bar graph and updates it with the current sensor reading 
+        """
         # draw and label y and x axis
         graphics.set_pen(caption_color)
-        
-        graphics.line(x, y + h - 10, x, y + 25)
-        graphics.line(x - 2, y + 27, x, y + 25)
-        graphics.line(x + 2, y + 27, x, y + 25)
+        graphics.line(x-1, y + h - 10, x, y + 25)
+        graphics.line(x - 1 - 2, y + 27, x, y + 25)
+        graphics.line(x - 1 + 2, y + 27, x, y + 25)
         l_text_width = graphics.measure_text(f"{self.lower}", scale=1)
         u_text_width = graphics.measure_text(f"{self.upper}", scale=1)
         graphics.text(f"{self.lower}", x - l_text_width, y + h - 10 - 8, scale=1)
@@ -154,7 +162,6 @@ class Sensor:
 
     def get_current_reading(self):
         current_val = self.dlog[self.dptr-1]
-
         if current_val is None:
             return "No reading yet"
         
